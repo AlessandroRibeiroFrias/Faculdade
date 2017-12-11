@@ -1,0 +1,186 @@
+<html lang="pt-br">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Aprendizado por reforço</title>
+    <link rel="stylesheet" href="xefer.css" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="print.css" type="text/css" media="print"/>
+    <style type="text/css">
+		
+	  body{
+		font-family: Comic Sans MS
+	  }
+	
+		.cronometro{
+      left:20px;
+			background-color:transparent;
+			border:none;
+      position: relative;
+      text-align: center;
+      background-position: center;
+      width: 48%;
+      font-size: 45px;
+		}
+
+    .labelTempo{
+      left:20px;
+      background-color:transparent;
+      border:none;
+      position: relative;
+      text-align: center;
+      background-position: center;
+      width: 48%;
+      font-size: 45px;
+    }
+		
+      .cell
+      {
+          float: left;
+          border-right: 1px solid transparent;
+          border-bottom: 1px solid transparent;
+          margin-right: -1px;
+          margin-bottom: -1px;
+          background: url(image/breadcrumb.png) no-repeat -10px;
+      }
+
+      .left { border-left: 1px solid #000000; }
+      .right { border-right: 1px solid #000000; }
+      .top { border-top: 1px solid #000000; }
+      .bottom { border-bottom: 1px solid #000000; }
+
+      .noleft { border-left: 1px solid transparent; }
+      .noright { border-right: 1px solid transparent; }
+      .notop { border-top: 1px solid transparent; }
+      .nobottom { border-bottom: 1px solid transparent; }
+
+      .mrow
+      {
+          float: left;
+      }
+
+      #box
+      {
+          margin: 0px auto 30px;
+          overflow: hidden;
+          padding-bottom: 1px;
+          background-color: #fff;
+          visibility: hidden;
+      }
+
+      @media screen
+      {
+          #details
+          {
+            margin: 1.5em .75em .5em;
+            padding: 1em;
+            border: 1px solid #ddd;
+            background-color: #fff;
+          }
+
+          #mazeform
+          {
+            padding: .5em;
+            margin: auto;
+            border: 1px solid #ddd;
+            background-color: #f4f4f4;
+          }
+
+          input
+          {
+            padding: 0 20px 0 0;
+            margin: 0 5px 0 0;
+            vertical-align: middle;
+          }
+      }
+
+      @media print
+      {
+          #details { display: none; }
+      }
+
+      .cell {height: 10px;} /* this rule must next to last */
+      .cell {width:  10px;} /* this rule must be last */
+
+    </style>
+    <script type="text/javascript" src="script/maze.js"></script>
+    <script type="text/javascript" src="script/solve.js"></script>
+    <script type="text/javascript" language="JavaScript">
+    function tempo(){ 
+    if (segundo < 59){
+      segundo++
+      if(segundo < 10){segundo = "0"+segundo}
+    }else 
+      if(segundo == 59 && minuto < 59){
+       segundo = 0+"0";
+    minuto++;
+    if(minuto < 10){minuto = "0"+minuto}
+      }
+    if(minuto == 59 && segundo == 59 && hora < 23){
+      segundo = 0+"0";
+      minuto = 0+"0";
+      hora++;
+      if(hora < 10){hora = "0"+hora}
+    }else 
+      if(minuto == 59 && segundo == 59 && hora == 23){
+       segundo = 0+"0";
+    minuto = 0+"0";
+    hora = 0+"0";
+      }
+    form.cronometro.value = hora +":"+ minuto +":"+ segundo
+    }
+    </script>
+  </head>
+  <body style="background-color:#86ACBF">
+    <div id="content">
+      <div id="details">
+        <h4 style="margin-bottom: 1em;text-align:center">Aprendizado por Reforço - Labirinto</h4>
+        <form id="mazeform" style="background-color:transparent" action="javascript:">
+          <table width="100%">
+            <tbody>
+              <tr>
+                <td>Linhas:</td>
+                <td><input value="50" name="y" type="text" /></td> 
+              </tr>
+              <tr>
+                <td>Colunas:</td>
+                <td><input value="80" name="x" type="text" /></td>
+              </tr>
+              <tr>
+                <td>Tam. do Labirinto:</td>
+                <td><input value="10" name="s" type="text" disabled /></td>
+                <td style="visibility:hidden">
+                  <input id="n2" value="lo" name="anfr" checked="checked" type="radio" /><label for="n2">Baixo</label>
+                  <input id="n1" value="hi" name="anfr" type="radio" /><label for="n1">Alto</label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="text-align:center;">
+            <button name="bld" onclick="build()" style="font-family:Comic Sans MS" disabled="disabled">Gerar Labirinto</button>
+            <button name="slv" onclick="solve(); intervalo = setInterval('tempo()',983);return false;" style="font-family:Comic Sans MS" disabled="disabled">Encontrar Caminho</button>
+          </div>
+        </form>
+      </div>
+		<div>
+			<form name="form">
+        <div class="labelTempo">Anterior</div>
+        <div class="labelTempo">Atual</div>
+        <input class="cronometro" type="text" id="tempoAnterior" value="00:00:00" readonly />
+			  <input class="cronometro" type="text" name="cronometro" value="00:00:00" readonly />
+			</form>
+		</div>
+      <div id="progress" style="display:none;">
+        <div id="labels" style="text-align:center;margin:3em auto 0em;font-weight:bold;font-size:16px">
+          <span name="label" id="initializing">Inicializando</span> &rarr;
+          <span name="label" id="generating">Gerando</span> &rarr;
+          <span name="label" id="rendering">Renderizando</span> &rarr;
+          <span name="label" id="display">Finalizando</span>
+        </div>
+        <div id="progbar" style="padding:1px;margin:1em auto;background-color:transparent;border:1px solid black;height:10px;width:100%;">
+          <div id="bar" style="background-color:#18416A;height:10px;width:0px;">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="box"></div>
+  </body>
+</html>
